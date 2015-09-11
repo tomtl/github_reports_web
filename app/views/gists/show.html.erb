@@ -1,0 +1,11 @@
+<div class="row">
+  <div class="col-lg-12">
+    <% if @gist %>
+      <h1><%= @gist.description %></h1>
+      <% @gist.files.each do |file| %>
+        <h3><%= file.name %> (<%= file.language %>)</h3>
+        <pre><code><%= file.content %></code></pre>
+      <% end %>
+    <% end %>
+  </div>
+</div>
