@@ -17,4 +17,10 @@ class SessionsController < ApplicationController
     flash[:danger] = "Authorization failed."
     redirect_to root_path
   end
+
+  def destroy
+    reset_session
+    flash[:info]
+    redirect_to root_path
+  end
 end
