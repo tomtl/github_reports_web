@@ -22,6 +22,8 @@ module GitHubAPI
   User = Struct.new(:name, :location, :public_repos)
   Event = Struct.new(:type, :repo_name)
   Repo = Struct.new(:name, :languages)
+  Gist = Struct.new(:id, :description, :public, :created_at)
+  Page = Struct.new(:page, :total_pages, :items)
 
   class Client
 
@@ -112,10 +114,33 @@ module GitHubAPI
 
       if response.status == 201
         body = response.body
-        Gist.new(body["id"], body["html_url"], body["description"], [], body["public"], body["created_at"])
+        Gist.new(
+          body["id"],
+          body["html_url"],
+          body["description"],
+          [],
+          body["public"],
+          body["created_at"]
+        )
       else
         raise GistCreationFailure, response.body["message"]
       end
+    end
+
+    def gists
+      url = "https://api.github.com/gists"
+      response = connection.get url
+
+      items = response.body.map do |gist_data|
+        Gist.new(
+          gist_data["id"],
+          gist_data["description"],
+          gist_data["public"],
+          gist_data["created_at"]
+        )
+      end
+
+      Page.new(1, 1, items)
     end
 
     def repo_starred?(full_repo_name)
