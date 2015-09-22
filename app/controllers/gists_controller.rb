@@ -5,7 +5,7 @@ class GistsController < ApplicationController
   before_filter :require_sign_in
 
   def index
-    @gists = github_api_client.gists
+    @gists = github_api_client.gists(page: params[:page])
   end
 
   private

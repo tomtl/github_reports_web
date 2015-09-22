@@ -127,9 +127,19 @@ module GitHubAPI
       end
     end
 
-    def gists
+    def gists(page:1)
+      page = page.present? ? page.to_i : 1
       url = "https://api.github.com/gists"
       response = connection.get url
+
+      last_page_url = header_link(response.headers, "last")
+
+      if last_page_url
+        uri = URI.parse(last_page_url)
+        total_pages = Rack::Utils.parse_query(uri.query)["page"].to_i
+      else
+        total_pages = page
+      end
 
       items = response.body.map do |gist_data|
         Gist.new(
@@ -140,7 +150,25 @@ module GitHubAPI
         )
       end
 
-      Page.new(1, 1, items)
+      Page.new(page, total_pages, items)
+    end
+
+    def header_link(headers, link_name)
+      header = headers["link"]
+
+      if header
+        links = header.split(",").inject({}) do |sum, link|
+          url_part, rel_part = link.split(";")
+          url = url_part.tr("<>", "").strip
+          name = rel_part.match(/rel="(.*)"/)[1].strip
+          sum[name] = url
+          sum
+        end
+      else
+        links = {}
+      end
+
+      links[link_name]
     end
 
     def repo_starred?(full_repo_name)
