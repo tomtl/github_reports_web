@@ -4,6 +4,10 @@ class GistsController < ApplicationController
 
   before_filter :require_sign_in
 
+  def index
+    @gists = github_api_client.gists(page: params[:page])
+  end
+
   def new
     @gist_form = GistForm.new
   end
@@ -16,7 +20,7 @@ class GistsController < ApplicationController
                                                         @gist_form.file_name,
                                                         @gist_form.file_contents)
       flash[:info] = "Your gist has been created and can be viewed at this url: #{gist_info.url}"
-      redirect_to gists_path
+      redirect_to gist_path(gist_info.id)
     else
       render :new
     end
@@ -25,8 +29,12 @@ class GistsController < ApplicationController
     render :new
   end
 
-  def index
-    @gists = github_api_client.gists(page: params[:page])
+  def show
+    client = GitHubAPI::Client.new(current_user.token)
+    @gist = client.gist_info(params[:id])
+  rescue GitHubAPI::NonexistentGist => e
+    flash.now[:danger] = e.message
+    render status: 404
   end
 
   private

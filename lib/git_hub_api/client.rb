@@ -22,7 +22,8 @@ module GitHubAPI
   User = Struct.new(:name, :location, :public_repos)
   Event = Struct.new(:type, :repo_name)
   Repo = Struct.new(:name, :languages)
-  Gist = Struct.new(:id, :description, :public, :created_at)
+  Gist = Struct.new(:id, :url, :description, :files, :public, :created_at)
+  GistFile = Struct.new(:name, :language, :content)
   Page = Struct.new(:page, :total_pages, :items)
 
   class Client
@@ -74,7 +75,6 @@ module GitHubAPI
         Repo.new(repo_data["full_name"], response.body)
       end.compact
     end
-
 
     def public_events_for_user(username)
       url = "https://api.github.com/users/#{username}/events/public"
@@ -151,6 +151,26 @@ module GitHubAPI
       end
 
       Page.new(page, total_pages, items)
+    end
+
+    def gist_info(gist_id)
+      url = "https://api.github.com/gists/#{gist_id}"
+
+      response = connection.get(url)
+
+      if response.status == 200
+        gist = response.body
+        files = gist["files"].map do |(name, file)|
+          GistFile.new(name, file["language"], file["content"])
+        end
+        Gist.new(gist["id"],
+                 gist["html_url"],
+                 gist["description"],
+                 files, gist["public"],
+                 gist["created_at"])
+      else
+        raise NonexistentGist, "No gist found with id #{gist_id}."
+      end
     end
 
     def header_link(headers, link_name)
