@@ -37,6 +37,15 @@ class GistsController < ApplicationController
     render status: 404
   end
 
+  def destroy
+    github_api_client.delete_gist(params[:id])
+    flash[:info] = "The gist was deleted."
+    redirect_to gists_path
+  rescue GitHubAPI::Error => e
+    flash[:danger] = "The gist could not be deleted: #{e.message}"
+    redirect_to gists_path
+  end
+
   private
 
   def gist_form_params

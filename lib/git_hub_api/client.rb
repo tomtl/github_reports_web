@@ -173,6 +173,16 @@ module GitHubAPI
       end
     end
 
+    def delete_gist(gist_id)
+      url = "https://api.github.com/gists/#{gist_id}"
+
+      response = connection.delete(url)
+
+      if response.status != 204
+        raise NonexistentGist, "No gist found with id #{gist_id}."
+      end
+    end
+
     def header_link(headers, link_name)
       header = headers["link"]
 
