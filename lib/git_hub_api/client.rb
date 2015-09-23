@@ -228,6 +228,7 @@ module GitHubAPI
         builder.use Middleware::JSONParsing
         builder.use Middleware::Logging, Rails.logger
         builder.use Middleware::Cache, Rails.cache
+        builder.use Middleware::Notification
         builder.adapter Faraday.default_adapter
       end
     end

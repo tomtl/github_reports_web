@@ -20,7 +20,7 @@ class GistsController < ApplicationController
                                                         @gist_form.file_name,
                                                         @gist_form.file_contents)
       flash[:info] = "Your gist has been created and can be viewed at this url: #{gist_info.url}"
-      # clear_gists_cache
+      clear_gists_cache
       redirect_to gist_path(gist_info.id)
     else
       render :new
