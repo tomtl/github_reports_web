@@ -3,7 +3,7 @@ require 'logger'
 module GitHubAPI
   module Middleware
     class Logging < Faraday::Middleware
-      def initialize(app)
+      def initialize(app, logger = default_logger)
         super(app)
         @logger = logger
       end
@@ -20,7 +20,7 @@ module GitHubAPI
         end
       end
 
-      def logger
+      def default_logger
         level = ENV["LOG_LEVEL"]
         logger = Logger.new(STDOUT)
         logger.formatter = proc { |severity, datetime, program, message| message + "\n" }

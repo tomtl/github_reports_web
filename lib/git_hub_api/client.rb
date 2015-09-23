@@ -144,7 +144,9 @@ module GitHubAPI
       items = response.body.map do |gist_data|
         Gist.new(
           gist_data["id"],
+          gist_data["html_url"],
           gist_data["description"],
+          [],
           gist_data["public"],
           gist_data["created_at"]
         )
@@ -224,8 +226,8 @@ module GitHubAPI
         builder.use Middleware::StatusCheck
         builder.use Middleware::Authentication, @token
         builder.use Middleware::JSONParsing
-        builder.use Middleware::Logging
-        builder.use Middleware::Cache, Storage::Redis.new
+        builder.use Middleware::Logging, Rails.logger
+        builder.use Middleware::Cache, Rails.cache
         builder.adapter Faraday.default_adapter
       end
     end

@@ -20,6 +20,7 @@ class GistsController < ApplicationController
                                                         @gist_form.file_name,
                                                         @gist_form.file_contents)
       flash[:info] = "Your gist has been created and can be viewed at this url: #{gist_info.url}"
+      # clear_gists_cache
       redirect_to gist_path(gist_info.id)
     else
       render :new
@@ -40,6 +41,7 @@ class GistsController < ApplicationController
   def destroy
     github_api_client.delete_gist(params[:id])
     flash[:info] = "The gist was deleted."
+    clear_gists_cache
     redirect_to gists_path
   rescue GitHubAPI::Error => e
     flash[:danger] = "The gist could not be deleted: #{e.message}"
@@ -56,4 +58,7 @@ class GistsController < ApplicationController
     @github_api_client ||= GitHubAPI::Client.new(current_user.token)
   end
 
+  def clear_gists_cache
+    Rails.cache.delete_matched "^https://api.github.com/gists"
+  end
 end
